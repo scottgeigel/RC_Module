@@ -15,7 +15,7 @@ bool poot(void* nah, int poots) {
         printf("poot ");
     }
     putchar('\n');
-    return false;
+    return true;
 }
 int main() {
     RC_Manager manager;

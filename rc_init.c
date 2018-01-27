@@ -53,24 +53,15 @@ void RC_Manager_set_rc(RC_Manager* this, int desired_rc) {
     fprintf(stderr, "THREAD %lu: locked module lock\n", pthread_self());
     //freeze all threads
     for (int i = 0; i < this->modules_count; i++) {
-        fprintf(stderr, "THREAD %lu: locking module %d wake lock\n", pthread_self(), i);
-        pthread_mutex_lock(&this->modules[i]->wake_lock);
-        fprintf(stderr, "THREAD %lu: locked module %d wake lock\n", pthread_self(), i);
-        this->modules[i]->should_wait = true;
-        fprintf(stderr, "THREAD %lu: unlocking module %d wake lock\n", pthread_self(), i);
-        pthread_mutex_unlock(&this->modules[i]->wake_lock);
-        fprintf(stderr, "THREAD %lu: unlocked module %d wake lock\n", pthread_self(), i);
-    }
-
-    for (int i = 0; i < this->modules_count; i++) {
         //TODO: find a more optimal way of doing this?
         fprintf(stderr, "THREAD %lu: locking routine for module %d\n", pthread_self(), i);
         pthread_mutex_lock(&this->modules[i]->routine_lock);
         fprintf(stderr, "THREAD %lu: locked routine for module %d\n", pthread_self(), i);
+        this->modules[i]->should_wait = true;
+    }
+
+    for (int i = 0; i < this->modules_count; i++) {
         this->modules[i]->on_rc_change(this->modules[i], this->run_level, desired_rc);
-        fprintf(stderr, "THREAD %lu: unlocking routine for module %d\n", pthread_self(), i);
-        pthread_mutex_unlock(&this->modules[i]->routine_lock);
-        fprintf(stderr, "THREAD %lu: unlocked routine for module %d\n", pthread_self(), i);
     }
 
     //now that the run level has been anounced to all modules, actually
@@ -79,9 +70,10 @@ void RC_Manager_set_rc(RC_Manager* this, int desired_rc) {
 
     //wake all threads
     for (int i = 0; i < this->modules_count; i++) {
-        fprintf(stderr, "THREAD %lu: signaling module %d\n", pthread_self(), i);
+        fprintf(stderr, "THREAD %lu: unlocking routine for module %d\n", pthread_self(), i);
+        pthread_mutex_unlock(&this->modules[i]->routine_lock);
+        fprintf(stderr, "THREAD %lu: unlocked routine for module %d\n", pthread_self(), i);
         pthread_cond_signal(&this->modules[i]->wake_thread);
-        fprintf(stderr, "THREAD %lu: signaled module %d\n", pthread_self(), i);
     }
     fprintf(stderr, "THREAD %lu: unlocking module lock\n", pthread_self());
     pthread_mutex_unlock(&this->module_lock);
