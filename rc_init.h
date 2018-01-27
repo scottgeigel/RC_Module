@@ -29,7 +29,9 @@ struct RC_Module {
     RC_Manager* parent;
     pthread_t thread;
     pthread_mutex_t routine_lock;
-    bool wake_thread;//TODO: add a wake pthread_cond_t
+    pthread_cond_t wake_thread;
+    pthread_mutex_t wake_lock;
+    bool should_wait;
     bool stop_thread;
     bool thread_dead;//TODO: replace with pthread_cond_t???
 };
