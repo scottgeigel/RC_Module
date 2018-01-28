@@ -100,6 +100,7 @@ static void* RC_Module_threadrun(void* p_module) {
 
     this->should_wait = true;
     this->thread_dead = false;
+    this->stop_thread = false;
 
     while (!this->stop_thread) {
         if (this->should_wait) {
