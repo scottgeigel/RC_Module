@@ -56,7 +56,6 @@ int main() {
 
     for (int i = 0; i < THREAD_COUNT; i++) {
         printf("joining thread %lu\n", threads[i]);
-        FloodGate_open(&gate);
         pthread_join(threads[i], NULL);
     }
     return 0;
